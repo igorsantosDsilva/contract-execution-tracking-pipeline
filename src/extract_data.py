@@ -95,3 +95,65 @@ def bronze_customers (token:str, operation_name:str, endpoint_db:str):
     except requests.exceptions.RequestException as e:
         logging.error(f'Error in request: {e}')
         return None
+
+# providers table    
+def bronze_providers(token:str, operation_name:str, endpoint_db:str):
+    headers = {
+        'content-type': 'application/json',
+        'authorization': f'Bearer {token}'
+    }
+    
+    json_data ={
+    "query": f"""
+    query {operation_name} {{
+        providers {{
+            client {{
+                id
+                name
+                __typename
+            }}
+            id
+            taxid
+            name
+            fantasy
+            phone
+            email
+            cell_phone
+            dap_number
+            contact
+            responsible
+            street
+            number
+            district
+            complement
+            state
+            zipcode
+            city
+            dap_number
+            __typename
+        }}
+    }}
+    """
+    }
+    
+    try:
+        response = requests.post(
+            endpoint_db,
+            headers=headers,
+            json=json_data, 
+            timeout=10
+        )
+        
+        response.raise_for_status()
+        response_json = response.json().get('data', {})
+        
+        if 'errors' in response_json:
+            logging.error(f'Error GraphQL: {response_json["errors"]}')
+            return None
+
+        logging.info(f'Bronze providers table successfully extracted')
+        return response_json
+    
+    except requests.exceptions.RequestException as e:
+        logging.error(f'Error in request: {e}')
+        return None
