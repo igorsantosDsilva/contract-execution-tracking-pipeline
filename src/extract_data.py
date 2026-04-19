@@ -2,10 +2,10 @@ import requests
 import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+# function to extract token session
 def extract_token(endpoint_db:str, login:str, password:str):
     headers = {
-        'content-type': 'application/json',
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36',
+        'content-type': 'application/json'
     }
 
     json_data = {
@@ -47,6 +47,50 @@ def extract_token(endpoint_db:str, login:str, password:str):
 
         logging.info('Token extracted successfully')
         return token
+    
+    except requests.exceptions.RequestException as e:
+        logging.error(f'Error in request: {e}')
+        return None
+
+# customers table
+def bronze_customers (token:str, operation_name:str, endpoint_db:str):
+    headers = {
+        'content-type': 'application/json',
+        'authorization': f'Bearer {token}',
+    }
+        
+    json_data = {
+        'query': f'''
+        query {operation_name} {{
+            clients {{
+               id
+               name
+               initials
+               alias
+               email
+               logo 
+            }}
+        }}
+        '''          
+    }
+    
+    try:
+        response = requests.post(
+            endpoint_db,
+            headers= headers,
+            json= json_data,
+            timeout=10
+        )
+        
+        response.raise_for_status()
+        response_json = response.json().get('data', {})
+        
+        if 'errors' in response_json:
+            logging.error(f"Error GraphQL: {response_json['errors']}")
+            return None
+        
+        logging.info('Bronze customers table successfuly extracted')
+        return response_json
     
     except requests.exceptions.RequestException as e:
         logging.error(f'Error in request: {e}')
