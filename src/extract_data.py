@@ -157,3 +157,64 @@ def bronze_providers(token:str, operation_name:str, endpoint_db:str):
     except requests.exceptions.RequestException as e:
         logging.error(f'Error in request: {e}')
         return None
+    
+# orders table
+def bronze_orders(token:str, operation_name:str, endpoint_db:str):
+    headers = {
+        'content-type': 'application/json',
+        'authorization': f'Bearer {token}'
+    }
+
+    json_data = {
+        "operationName": operation_name,
+        "variables": {
+            "year": None
+        },
+        "query": f"""
+        query {operation_name} ($year: Int) {{
+            ordersQuery(year: $year) {{
+                id
+                number
+                year
+                document_label
+                order_date
+                total_amount_items
+                term_id
+                document
+                type
+                provider
+                entity
+                entity_id
+                entity_initials
+                user
+                modality
+                issuer
+                blocked_period
+                source
+                status
+                __typename
+            }}
+        }}
+        """
+    }
+    try:
+        response = requests.post(
+            endpoint_db,
+            headers=headers,
+            json=json_data, 
+            timeout=10
+        )
+        
+        response.raise_for_status()
+        response_json = response.json().get('data', {})
+        
+        if 'errors' in response_json:
+            logging.error(f'Error GraphQL: {response_json["errors"]}')
+            return None
+        
+        logging.info(f'Bronze orders table successfully extracted')
+        return response_json
+    
+    except requests.exceptions.RequestException as e:
+        logging.error(f'Error in request: {e}')
+        return None
