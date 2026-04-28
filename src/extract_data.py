@@ -1,9 +1,20 @@
 import requests
 import logging
+
+# Configure logging format and level
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# function to extract token session
 def extract_token(endpoint_db:str, login:str, password:str):
+    """
+        Authenticate user and retrieve access token for subsequent requests.
+        
+        Args: 
+            endpoint_db (str): GraphQL endpoint URL for authentication.
+            login (str): User login name.
+            password (str): User password.
+        Returns:
+            str: Access token if authentication is successful, None otherwise.
+    """
     headers = {
         'content-type': 'application/json'
     }
@@ -52,8 +63,17 @@ def extract_token(endpoint_db:str, login:str, password:str):
         logging.error(f'Error in request: {e}')
         return None
 
-# customers table
 def bronze_customers (token:str, operation_name:str, endpoint_db:str):
+    """
+       Extract raw customers data from API into bronze layer
+       
+       Args: 
+              token (str): Access token for authentication.
+              operation_name (str): Name of the GraphQL operation to execute.
+              endpoint_db (str): GraphQL endpoint URL for data extraction.
+        Returns:
+              dict: Extracted customers data if successful, None otherwise.
+    """
     headers = {
         'content-type': 'application/json',
         'authorization': f'Bearer {token}',
@@ -95,9 +115,17 @@ def bronze_customers (token:str, operation_name:str, endpoint_db:str):
     except requests.exceptions.RequestException as e:
         logging.error(f'Error in request: {e}')
         return None
-
-# providers table    
+    
 def bronze_providers(token:str, operation_name:str, endpoint_db:str):
+    """
+        Extract raw providers data from API into bronze layer
+        Args: 
+              token (str): Access token for authentication.
+              operation_name (str): Name of the GraphQL operation to execute.
+              endpoint_db (str): GraphQL endpoint URL for data extraction.
+        Returns:
+              dict: Extracted providers data if successful, None otherwise.
+    """
     headers = {
         'content-type': 'application/json',
         'authorization': f'Bearer {token}'
@@ -158,8 +186,16 @@ def bronze_providers(token:str, operation_name:str, endpoint_db:str):
         logging.error(f'Error in request: {e}')
         return None
     
-# orders table
 def bronze_orders(token:str, operation_name:str, endpoint_db:str):
+    """
+        Extract raw orders data from API into bronze layer
+        Args: 
+              token (str): Access token for authentication.
+              operation_name (str): Name of the GraphQL operation to execute.
+              endpoint_db (str): GraphQL endpoint URL for data extraction.
+        Returns:
+              dict: Extracted orders data if successful, None otherwise.
+    """
     headers = {
         'content-type': 'application/json',
         'authorization': f'Bearer {token}'
@@ -218,3 +254,4 @@ def bronze_orders(token:str, operation_name:str, endpoint_db:str):
     except requests.exceptions.RequestException as e:
         logging.error(f'Error in request: {e}')
         return None
+    
