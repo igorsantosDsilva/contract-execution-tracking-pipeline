@@ -254,4 +254,70 @@ def bronze_orders(token:str, operation_name:str, endpoint_db:str):
     except requests.exceptions.RequestException as e:
         logging.error(f'Error in request: {e}')
         return None
+
+def bronze_items (token:str, operation_name:str, endpoint_db:str):
+    """
+        Extract raw items data from API into bronze layer
+        Args: 
+              token (str): Access token for authentication.
+              operation_name (str): Name of the GraphQL operation to execute.
+              endpoint_db (str): GraphQL endpoint URL for data extraction.
+        Returns:
+              dict: Extracted items data if successful, None otherwise.
+    """
+    headers = {
+        'content-type': 'application/json',
+        'authorization': f'Bearer {token}'
+    }
+
+    json_data = {
+        'query': f'''
+        query {operation_name} {{
+            all_items {{
+                id
+                quantity  
+                quantity_item   
+                quantity_unit_item  
+                unit_price
+                amount
+                number
+                brand
+                unit_measure
+                details
+                percentage
+                fractioned
+                estimated_value
+                decrease
+                type
+                utilized_amount
+                balance
+                query_provider
+                document_number
+                document_object
+                identification
+                __typename
+            }}
+        }}
+        '''          
+    }
+    try:
+        response = requests.post(
+            endpoint_db, 
+            headers=headers, 
+            json=json_data, 
+            timeout=10
+        )
+        
+        response.raise_for_status()
+        response_json = response.json().get('data', {})
+        
+        if 'errors' in response_json:
+            logging.error(f'Error GraphQL: {response_json['errors']}')
+            return None
     
+        logging.info('Bronze items table successfully extracted')
+        return response_json
+    
+    except requests.exceptions.RequestException as e:
+        logging.error(f'Error in request: {e}')
+        return None 
