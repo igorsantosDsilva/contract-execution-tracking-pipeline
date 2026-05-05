@@ -202,7 +202,6 @@ def bronze_orders(token:str, operation_name:str, endpoint_db:str):
     }
 
     json_data = {
-        "operationName": operation_name,
         "variables": {
             "year": None
         },
@@ -320,4 +319,105 @@ def bronze_items (token:str, operation_name:str, endpoint_db:str):
     
     except requests.exceptions.RequestException as e:
         logging.error(f'Error in request: {e}')
-        return None 
+        return None
+    
+def bronze_doc_providers(token: str, operation_name:str, endpoint_db:str):
+    """
+        Extract raw doc_providers data from API into bronze layer
+        Args: 
+              token (str): Access token for authentication.
+              operation_name (str): Name of the GraphQL operation to execute.
+              endpoint_db (str): GraphQL endpoint URL for data extraction.
+        Returns:
+              dict: Extracted doc_providers data if successful, None otherwise.
+    """
+    
+    headers = {
+        'content-type': 'application/json',
+        'authorization': f'Bearer {token}'
+    }
+    
+
+    json_data = {
+        "query": f"""
+        query {operation_name}($id: ID, $status: [ID], $type: Int) {{
+            {operation_name}(id: $id, status: $status, type: $type) {{
+                id
+                balance
+                balance_used
+                balance_used_implantation
+                amount
+                label
+                number_document
+
+                trading {{
+                    id
+                    description
+                    __typename
+                }}
+
+                term {{
+                    id
+                    number
+                    year
+                    initial
+                    final
+                    type
+                    is_in_the_period
+
+                    status {{
+                        id
+                        description
+                        __typename
+                    }}
+
+                    __typename
+                }}
+
+                providers {{
+                    id
+                    name
+                    total_items
+                    balance_used
+                    total_balance
+                    balance_used_implantation
+
+                    document_items {{
+                        id
+                        details
+                        unit_price
+                        quantity
+                        balance
+                        amount
+                        __typename
+                    }}
+
+                    __typename
+                }}
+
+                __typename
+            }}
+            }}
+            """
+    }
+    
+    try:
+        response = requests.post(
+            endpoint_db,
+            headers=headers,
+            json=json_data, 
+            timeout=10
+        )
+        
+        response.raise_for_status()
+        response_json = response.json().get('data', {})
+        
+        if 'errors' in response_json:
+            logging.error(f'Error GraphQL: {response_json["errors"]}')
+            return None
+
+        logging.info(f'Bronze doc_providers table successfully extracted')
+        return response_json
+    except requests.exceptions.RequestException as e:
+        logging.error(f'Error in request: {e}')
+        return None
