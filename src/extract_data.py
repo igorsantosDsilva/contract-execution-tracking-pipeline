@@ -103,11 +103,13 @@ def bronze_customers (token:str, operation_name:str, endpoint_db:str):
         )
         
         response.raise_for_status()
-        response_json = response.json().get('data', {})
+        response_json = response.json()
         
         if 'errors' in response_json:
             logging.error(f"Error GraphQL: {response_json['errors']}")
             return None
+        
+        response_json = response_json.get('data', {})
         
         logging.info('Bronze customers table successfuly extracted')
         return response_json
@@ -173,12 +175,14 @@ def bronze_providers(token:str, operation_name:str, endpoint_db:str):
         )
         
         response.raise_for_status()
-        response_json = response.json().get('data', {})
+        response_json = response.json()
         
         if 'errors' in response_json:
             logging.error(f'Error GraphQL: {response_json["errors"]}')
             return None
-
+        
+        response_json = response_json.get('data', {})
+        
         logging.info(f'Bronze providers table successfully extracted')
         return response_json
     
@@ -241,11 +245,13 @@ def bronze_orders(token:str, operation_name:str, endpoint_db:str):
         )
         
         response.raise_for_status()
-        response_json = response.json().get('data', {})
+        response_json = response.json()
         
         if 'errors' in response_json:
             logging.error(f'Error GraphQL: {response_json["errors"]}')
             return None
+        
+        response_json = response_json.get('data', {})
         
         logging.info(f'Bronze orders table successfully extracted')
         return response_json
@@ -308,12 +314,14 @@ def bronze_items (token:str, operation_name:str, endpoint_db:str):
         )
         
         response.raise_for_status()
-        response_json = response.json().get('data', {})
+        response_json = response.json()
         
         if 'errors' in response_json:
             logging.error(f'Error GraphQL: {response_json['errors']}')
             return None
-    
+        
+        response_json = response_json.get('data', {})
+        
         logging.info('Bronze items table successfully extracted')
         return response_json
     
@@ -410,12 +418,14 @@ def bronze_doc_providers(token: str, operation_name:str, endpoint_db:str):
         )
         
         response.raise_for_status()
-        response_json = response.json().get('data', {})
+        response_json = response.json()
         
         if 'errors' in response_json:
             logging.error(f'Error GraphQL: {response_json["errors"]}')
             return None
-
+        
+        response_json = response_json.get('data', {})
+        
         logging.info(f'Bronze doc_providers table successfully extracted')
         return response_json
     except requests.exceptions.RequestException as e:
