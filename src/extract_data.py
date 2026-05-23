@@ -1,9 +1,22 @@
 import requests
 import logging
+import json
+
+from pathlib import Path
 
 # Configure logging format and level
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+def save_data(file_name, json_data):
+    output_path = "data/"+ file_name + ".json"
+    output_dir = Path(output_path).parent
+    output_dir.mkdir(parents=True, exist_ok=True)
+     
+    with open(output_path, 'w') as f:
+        json.dump(json_data, f, indent=4)
+          
+    logging.info(f"Data saved to {output_path}")
+     
 def extract_token(endpoint_db:str, login:str, password:str):
     """
         Authenticate user and retrieve access token for subsequent requests.
@@ -110,6 +123,7 @@ def bronze_customers (token:str, operation_name:str, endpoint_db:str):
             return None
         
         response_json = response_json.get('data', {})
+        save_data("customers", response_json)
         
         logging.info('Bronze customers table successfuly extracted')
         return response_json
@@ -182,6 +196,7 @@ def bronze_providers(token:str, operation_name:str, endpoint_db:str):
             return None
         
         response_json = response_json.get('data', {})
+        save_data("providers", response_json)
         
         logging.info(f'Bronze providers table successfully extracted')
         return response_json
@@ -252,6 +267,7 @@ def bronze_orders(token:str, operation_name:str, endpoint_db:str):
             return None
         
         response_json = response_json.get('data', {})
+        save_data("orders", response_json)
         
         logging.info(f'Bronze orders table successfully extracted')
         return response_json
@@ -321,6 +337,7 @@ def bronze_items (token:str, operation_name:str, endpoint_db:str):
             return None
         
         response_json = response_json.get('data', {})
+        save_data("items", response_json)
         
         logging.info('Bronze items table successfully extracted')
         return response_json
@@ -425,6 +442,7 @@ def bronze_doc_providers(token: str, operation_name:str, endpoint_db:str):
             return None
         
         response_json = response_json.get('data', {})
+        save_data("doc_providers", response_json)
         
         logging.info(f'Bronze doc_providers table successfully extracted')
         return response_json
